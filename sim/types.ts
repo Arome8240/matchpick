@@ -84,12 +84,19 @@ export interface PickDistribution {
 
 export type MatchdayStatus = "upcoming" | "locked" | "settled";
 
+export interface BotPickEntry {
+  picks: Pick[];
+  fullSlate: boolean;
+}
+
 export interface Matchday {
   number: number;
   fixtures: Fixture[];
   status: MatchdayStatus;
-  results?: FixtureResult[];
+  /** generated once — at user submission, or at settlement if the user never submitted */
+  botPicks?: Record<string, BotPickEntry>;
   pickDistribution?: PickDistribution[];
+  results?: FixtureResult[];
   scores?: MatchdayScoreResult[];
   prizes?: PrizeAward[];
 }

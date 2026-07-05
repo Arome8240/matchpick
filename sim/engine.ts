@@ -1,5 +1,6 @@
 import type {
   AppState,
+  BotPickEntry,
   DailyFreePick,
   Fixture,
   FixtureResult,
@@ -180,19 +181,44 @@ export function setUserExactScore(
   };
 }
 
+function ensureBotPicksAndDistribution(
+  state: AppState
+): { botPicks: Record<string, BotPickEntry>; distribution: PickDistribution[] } {
+  if (state.matchday.botPicks && state.matchday.pickDistribution) {
+    return { botPicks: state.matchday.botPicks, distribution: state.matchday.pickDistribution };
+  }
+  const activePlayers = getActivePlayers(state);
+  const activityBias = (state.settings.activePlayerCount - 40) / 200;
+  const botPicks: Record<string, BotPickEntry> = {};
+  for (const player of activePlayers) {
+    botPicks[player.id] = generateBotPicks(player, state.matchday.fixtures, activityBias);
+  }
+  const userSubmitted = hasUserSubmitted(state);
+  const userPicks = getUserPicks(state);
+  const allPicksForDistribution: Pick[][] = [
+    ...(userSubmitted ? [userPicks] : []),
+    ...Object.values(botPicks).map((b) => b.picks),
+  ];
+  const distribution = computePickDistribution(state.matchday.fixtures, allPicksForDistribution);
+  return { botPicks, distribution };
+}
+
 export function submitUserPicks(state: AppState): AppState {
   if (hasUserSubmitted(state) || getUserPicks(state).length === 0) return state;
   const isFirstEver = Object.keys(state.user.submittedByMatchday).length === 0;
   const badges = isFirstEver && !state.user.badges.includes("FIRST_SLATE")
     ? [...state.user.badges, "FIRST_SLATE" as const]
     : state.user.badges;
+  const user: UserState = {
+    ...state.user,
+    submittedByMatchday: { ...state.user.submittedByMatchday, [state.matchday.number]: true },
+    badges,
+  };
+  const intermediate: AppState = { ...state, user };
+  const { botPicks, distribution } = ensureBotPicksAndDistribution(intermediate);
   return {
-    ...state,
-    user: {
-      ...state.user,
-      submittedByMatchday: { ...state.user.submittedByMatchday, [state.matchday.number]: true },
-      badges,
-    },
+    ...intermediate,
+    matchday: { ...intermediate.matchday, botPicks, pickDistribution: distribution },
   };
 }
 
@@ -322,17 +348,7 @@ export function settleMatchday(state: AppState): AppState {
   const results = simulateResults(fixtures, userSubmitted ? userPicks : [], state.settings.luckBias);
 
   const activePlayers = getActivePlayers(state);
-  const botPickMap = new Map<string, { picks: Pick[]; fullSlate: boolean }>();
-  const activityBias = (state.settings.activePlayerCount - 40) / 200;
-  for (const player of activePlayers) {
-    botPickMap.set(player.id, generateBotPicks(player, fixtures, activityBias));
-  }
-
-  const allPicksForDistribution: Pick[][] = [
-    ...(userSubmitted ? [userPicks] : []),
-    ...Array.from(botPickMap.values()).map((b) => b.picks),
-  ];
-  const distribution = computePickDistribution(fixtures, allPicksForDistribution);
+  const { botPicks, distribution } = ensureBotPicksAndDistribution(state);
 
   const userScore: MatchdayScoreResult = {
     playerId: "user",
@@ -340,17 +356,17 @@ export function settleMatchday(state: AppState): AppState {
   };
 
   const botScores: MatchdayScoreResult[] = activePlayers.map((player) => {
-    const { picks } = botPickMap.get(player.id)!;
+    const entry = botPicks[player.id] ?? { picks: [], fullSlate: false };
     return {
       playerId: player.id,
-      ...scoreMatchdayForPicks(picks, fixtures, results, distribution, player.streak),
+      ...scoreMatchdayForPicks(entry.picks, fixtures, results, distribution, player.streak),
     };
   });
 
   const allScores = [userScore, ...botScores];
   const prizes = computePrizes(allScores, (id) => {
     if (id === "user") return userSubmitted && userPicks.length > 0;
-    return (botPickMap.get(id)?.picks.length ?? 0) > 0;
+    return (botPicks[id]?.picks.length ?? 0) > 0;
   });
 
   let wallet = state.wallet;
@@ -376,7 +392,7 @@ export function settleMatchday(state: AppState): AppState {
   const updatedPlayers = state.players.map((player) => {
     const botScore = botScores.find((s) => s.playerId === player.id);
     if (!botScore) return player;
-    const { picks, fullSlate } = botPickMap.get(player.id)!;
+    const { picks, fullSlate } = botPicks[player.id] ?? { picks: [], fullSlate: false };
     const streakUpdate = updateStreakAndPoints(player.streak, 0, fullSlate, picks.length > 0);
     return {
       ...player,
@@ -395,6 +411,7 @@ export function settleMatchday(state: AppState): AppState {
       status: "settled",
       results,
       pickDistribution: distribution,
+      botPicks,
       scores: allScores,
       prizes,
     },
