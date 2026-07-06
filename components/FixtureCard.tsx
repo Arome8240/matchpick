@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Minus, Plus } from "lucide-react";
 import type { Fixture, FixtureResult, FixtureScoreBreakdown, Outcome, Pick, PickDistribution, Score } from "@/sim/types";
 import { formatDuration } from "@/lib/format";
 
