@@ -16,7 +16,7 @@ function AppShell() {
   const [simPanelOpen, setSimPanelOpen] = useState(false);
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-paper">
+    <div className="mx-auto flex min-h-dvh w-full min-w-0 max-w-md flex-col bg-paper">
       <TopBar onOpenSimPanel={() => setSimPanelOpen(true)} />
       <main className="flex-1">
         {tab === "play" && <PlayScreen />}
