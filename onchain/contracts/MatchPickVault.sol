@@ -100,7 +100,7 @@ contract MatchPickVault is Initializable, UUPSUpgradeable, AccessControlUpgradea
 
         __AccessControl_init();
         __Pausable_init();
-        __UUPSUpgradeable_init();
+        // UUPSUpgradeable has no storage of its own to initialize in this OZ version.
 
         _reentrancyStatus = _NOT_ENTERED;
         cUSD = IERC20(cUSDToken);
@@ -247,5 +247,5 @@ contract MatchPickVault is Initializable, UUPSUpgradeable, AccessControlUpgradea
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 
     /// @dev Storage gap for safe future upgrades — reduce as new state variables are added.
-    uint256[45] private __gap;
+    uint256[44] private __gap;
 }

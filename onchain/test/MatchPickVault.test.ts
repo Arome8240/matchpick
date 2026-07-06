@@ -194,6 +194,41 @@ describe("MatchPickVault", () => {
         "TooManyWinners"
       );
     });
+
+    it("blocks a reentrant call triggered from within the token transfer during settlement", async () => {
+      // The reentrant call targets fundMatchday — unrestricted and would otherwise succeed on
+      // its own merits (unlike re-entering settleMatchday, which would incidentally get blocked
+      // by access control or the already-settled check instead of the guard). That isolates the
+      // revert to the reentrancy guard itself.
+      const MaliciousFactory = await ethers.getContractFactory("MaliciousReentrantToken");
+      const evilToken = await MaliciousFactory.deploy();
+      await evilToken.waitForDeployment();
+
+      const VaultFactory = await ethers.getContractFactory("MatchPickVault");
+      const evilVault = (await upgrades.deployProxy(
+        VaultFactory,
+        [await evilToken.getAddress(), admin.address, settler.address],
+        { kind: "uups" }
+      )) as unknown as MatchPickVault;
+      await evilVault.waitForDeployment();
+
+      await evilToken.mint(sponsor.address, parse("25"));
+      await evilToken.connect(sponsor).approve(await evilVault.getAddress(), ethers.MaxUint256);
+      await evilVault.connect(sponsor).fundMatchday(1, parse("25"));
+
+      // Give the token contract itself enough balance + allowance to fund matchday 2 when it
+      // reenters as msg.sender.
+      await evilToken.mint(await evilToken.getAddress(), parse("10"));
+      await evilToken.approveSelf(await evilVault.getAddress(), parse("10"));
+      await evilToken.setAttack(await evilVault.getAddress(), 2, true);
+
+      await expect(
+        evilVault.connect(settler).settleMatchday(1, [alice.address], [parse("10")])
+      ).to.be.revertedWithCustomError(evilVault, "ReentrantCall");
+
+      // Confirm the reentrant call didn't sneak through and fund matchday 2 either.
+      expect((await evilVault.getMatchday(2)).funded).to.equal(0n);
+    });
   });
 
   describe("payReferralBonus", () => {
