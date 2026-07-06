@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CircleCheckBig, PartyPopper, Target } from "lucide-react";
 import { useAppDispatch, useAppState } from "@/store/AppContext";
 import { getUserPicks, hasUserSubmitted } from "@/sim/engine";
 import FixtureCard from "@/components/FixtureCard";
@@ -66,11 +67,13 @@ export default function PlayScreen() {
             )}
           </div>
           {userScore.perfectBonus > 0 && (
-            <p className="mt-1 text-xs font-semibold text-gold-300">🎯 Perfect matchday bonus +{userScore.perfectBonus}!</p>
+            <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-gold-300">
+              <Target size={13} /> Perfect matchday bonus +{userScore.perfectBonus}!
+            </p>
           )}
           {!!userPrize && userPrize > 0 && (
-            <p className="mt-2 rounded-lg bg-white/10 px-2.5 py-1.5 text-sm font-bold text-gold-300">
-              🎉 You won {formatMoney(userPrize)} from the prize pool!
+            <p className="mt-2 flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1.5 text-sm font-bold text-gold-300">
+              <PartyPopper size={16} /> You won {formatMoney(userPrize)} from the prize pool!
             </p>
           )}
         </div>
@@ -124,7 +127,9 @@ export default function PlayScreen() {
 
       {submitted && !settled && (
         <div className="mt-4 rounded-2xl border border-dashed border-pitch-700/30 bg-pitch-700/5 p-4 text-center">
-          <p className="text-sm font-semibold text-pitch-800">Slate locked in ✅</p>
+          <p className="flex items-center justify-center gap-1.5 text-sm font-semibold text-pitch-800">
+            <CircleCheckBig size={15} /> Slate locked in
+          </p>
           <p className="mt-1 text-xs text-ink-soft">
             Results land once this matchday settles. Use the sim panel to advance time and settle.
           </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Share2, Users } from "lucide-react";
 import { useAppDispatch, useAppState } from "@/store/AppContext";
 import { findLeagueByCode } from "@/sim/engine";
 import { getLeaderboardRows } from "@/sim/selectors";
@@ -44,7 +45,7 @@ export default function LeaguesScreen() {
     if (!league) return;
     const rows = getLeaderboardRows(state, "season", leagueId).slice(0, 5);
     const lines = [
-      `⚽ MatchPick — ${league.name}`,
+      `MatchPick — ${league.name}`,
       `Season ${state.season} standings:`,
       ...rows.map((r, i) => `${i + 1}. ${r.name} — ${r.points} pts`),
       `Join with code ${league.code} in the MatchPick mini app.`,
@@ -110,7 +111,7 @@ export default function LeaguesScreen() {
       <h2 className="mb-2 text-sm font-bold text-ink">Your leagues</h2>
       {myLeagues.length === 0 ? (
         <div className="mb-5 flex flex-col items-center gap-2 rounded-2xl border border-dashed border-ink/10 py-8 text-center">
-          <span className="text-2xl">👥</span>
+          <Users size={26} className="text-ink-soft/60" />
           <p className="text-sm font-semibold text-ink">No leagues yet</p>
           <p className="max-w-[220px] text-xs text-ink-soft">Create one or join a demo league below to compare picks with friends.</p>
         </div>
@@ -156,9 +157,17 @@ export default function LeaguesScreen() {
                 <button
                   type="button"
                   onClick={() => shareLeague(league.id)}
-                  className="mt-3 w-full rounded-full border border-pitch-700/40 py-2 text-xs font-bold text-pitch-800 active:scale-[0.98]"
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border border-pitch-700/40 py-2 text-xs font-bold text-pitch-800 active:scale-[0.98]"
                 >
-                  {copiedId === league.id ? "Copied to clipboard ✓" : "Share to WhatsApp"}
+                  {copiedId === league.id ? (
+                    <>
+                      <Check size={14} /> Copied to clipboard
+                    </>
+                  ) : (
+                    <>
+                      <Share2 size={14} /> Share to WhatsApp
+                    </>
+                  )}
                 </button>
               </div>
             );

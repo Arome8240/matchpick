@@ -193,17 +193,17 @@ function Stepper({ value, onChange }: { value: number; onChange: (value: number)
       <button
         type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
-        className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-bold text-ink shadow-sm active:scale-95"
+        className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-ink shadow-sm active:scale-95"
       >
-        –
+        <Minus size={12} />
       </button>
       <span className="w-4 text-center text-sm font-bold text-ink">{value}</span>
       <button
         type="button"
         onClick={() => onChange(Math.min(9, value + 1))}
-        className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-bold text-ink shadow-sm active:scale-95"
+        className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-ink shadow-sm active:scale-95"
       >
-        +
+        <Plus size={12} />
       </button>
     </div>
   );
