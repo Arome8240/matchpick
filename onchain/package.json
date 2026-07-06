@@ -1,0 +1,24 @@
+{
+  "name": "@matchpick/onchain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MatchPick prize pool vault contracts (Celo)",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage",
+    "deploy:alfajores": "hardhat run scripts/deploy.ts --network alfajores",
+    "deploy:celo": "hardhat run scripts/deploy.ts --network celo",
+    "upgrade:alfajores": "hardhat run scripts/upgrade.ts --network alfajores",
+    "verify:alfajores": "hardhat verify --network alfajores"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.1.0",
+    "@openzeppelin/contracts-upgradeable": "^5.1.0",
+    "@openzeppelin/hardhat-upgrades": "^3.6.0",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.22.17",
+    "typescript": "^5.6.3"
+  }
+}
