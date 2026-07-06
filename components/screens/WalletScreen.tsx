@@ -1,15 +1,16 @@
 "use client";
 
+import { Dices, Gift, Handshake, Trophy, type LucideIcon } from "lucide-react";
 import { useAppState } from "@/store/AppContext";
 import { formatMoney, formatSimTimestamp } from "@/lib/format";
 import type { TransactionType } from "@/sim/types";
 import PredictionCard from "@/components/PredictionCard";
 
-const TYPE_META: Record<TransactionType, { icon: string; label: string }> = {
-  STARTING_BALANCE: { icon: "🎁", label: "Welcome bonus" },
-  PRIZE_RANK: { icon: "🏆", label: "Prize pool" },
-  PRIZE_DRAW: { icon: "🎲", label: "Random draw" },
-  REFERRAL_BONUS: { icon: "🤝", label: "Referral bonus" },
+const TYPE_META: Record<TransactionType, { Icon: LucideIcon; label: string }> = {
+  STARTING_BALANCE: { Icon: Gift, label: "Welcome bonus" },
+  PRIZE_RANK: { Icon: Trophy, label: "Prize pool" },
+  PRIZE_DRAW: { Icon: Dices, label: "Random draw" },
+  REFERRAL_BONUS: { Icon: Handshake, label: "Referral bonus" },
 };
 
 export default function WalletScreen() {
@@ -39,8 +40,8 @@ export default function WalletScreen() {
             const meta = TYPE_META[tx.type];
             return (
               <div key={tx.id} className="flex items-center gap-3 rounded-xl border border-ink/5 bg-white px-3 py-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-paper-dim text-base">
-                  {meta.icon}
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-paper-dim text-pitch-800">
+                  <meta.Icon size={16} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ink">{tx.description}</p>

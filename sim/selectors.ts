@@ -106,15 +106,17 @@ function ordinalSuffix(n: number): string {
   return "th";
 }
 
-export const BADGE_CATALOG: Record<Badge, { label: string; icon: string; hint: string }> = {
-  FIRST_SLATE: { label: "First Slate", icon: "✅", hint: "Submit your first full matchday slate." },
-  PERFECT_MATCHDAY: { label: "Perfect Matchday", icon: "🎯", hint: "Get all 8 outcomes correct in one matchday." },
-  STREAK_5: { label: "On Fire", icon: "🔥", hint: "Reach a 5 matchday submission streak." },
-  SEASON_TOP10: { label: "Top 10 Finish", icon: "🏅", hint: "Finish a season ranked in the top 10." },
-  SEASON_CHAMPION: { label: "Season Champion", icon: "🏆", hint: "Finish a season ranked #1." },
-  UPSET_HUNTER: { label: "Upset Hunter", icon: "⚡", hint: "Correctly call an outcome fewer than 25% of the pool picked." },
-  PRIZE_WINNER: { label: "Prize Winner", icon: "💰", hint: "Win any share of a weekly prize pool." },
-  REFERRER: { label: "Squad Builder", icon: "🤝", hint: "Get a friend to join with your referral link." },
+export type BadgeIconKey = "check" | "target" | "flame" | "medal" | "trophy" | "zap" | "coins" | "handshake";
+
+export const BADGE_CATALOG: Record<Badge, { label: string; icon: BadgeIconKey; hint: string }> = {
+  FIRST_SLATE: { label: "First Slate", icon: "check", hint: "Submit your first full matchday slate." },
+  PERFECT_MATCHDAY: { label: "Perfect Matchday", icon: "target", hint: "Get all 8 outcomes correct in one matchday." },
+  STREAK_5: { label: "On Fire", icon: "flame", hint: "Reach a 5 matchday submission streak." },
+  SEASON_TOP10: { label: "Top 10 Finish", icon: "medal", hint: "Finish a season ranked in the top 10." },
+  SEASON_CHAMPION: { label: "Season Champion", icon: "trophy", hint: "Finish a season ranked #1." },
+  UPSET_HUNTER: { label: "Upset Hunter", icon: "zap", hint: "Correctly call an outcome fewer than 25% of the pool picked." },
+  PRIZE_WINNER: { label: "Prize Winner", icon: "coins", hint: "Win any share of a weekly prize pool." },
+  REFERRER: { label: "Squad Builder", icon: "handshake", hint: "Get a friend to join with your referral link." },
 };
 
 export const ALL_BADGES: Badge[] = [

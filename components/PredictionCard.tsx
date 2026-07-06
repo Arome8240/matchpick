@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Download } from "lucide-react";
 import { useAppState } from "@/store/AppContext";
 import { getUserPicks } from "@/sim/engine";
 
@@ -30,7 +31,7 @@ export default function PredictionCard() {
 
     ctx.fillStyle = "#e0b53f";
     ctx.font = "bold 40px sans-serif";
-    ctx.fillText("⚽ MatchPick", 40, 80);
+    ctx.fillText("MatchPick", 40, 80);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "600 24px sans-serif";
@@ -92,9 +93,9 @@ export default function PredictionCard() {
           <a
             href={imageUrl}
             download="matchpick-prediction-card.png"
-            className="block w-full rounded-full bg-pitch-800 py-2.5 text-center text-xs font-bold text-white active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-1.5 rounded-full bg-pitch-800 py-2.5 text-center text-xs font-bold text-white active:scale-[0.98]"
           >
-            Download card
+            <Download size={14} /> Download card
           </a>
         </div>
       ) : (

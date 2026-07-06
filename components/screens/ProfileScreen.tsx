@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Copy, Trophy, UserRound } from "lucide-react";
 import { useAppDispatch, useAppState } from "@/store/AppContext";
 import { nextRankInfo } from "@/sim/engine";
 import { generateReferralLink } from "@/store/AppContext";
 import { ALL_BADGES, BADGE_CATALOG } from "@/sim/selectors";
+import { BADGE_ICONS } from "@/components/ui/badgeIcons";
 import BadgeChip from "@/components/ui/BadgeChip";
 import StreakFlame from "@/components/ui/StreakFlame";
 
@@ -28,8 +30,8 @@ export default function ProfileScreen() {
 
       <div className="rounded-2xl bg-pitch-900 p-5 text-white">
         <div className="flex items-center gap-3">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold-400/20 text-lg font-extrabold text-gold-300">
-            YOU
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gold-400/20 text-gold-300">
+            <UserRound size={26} />
           </span>
           <div className="min-w-0">
             <p className="text-lg font-extrabold">{rank}</p>
@@ -51,7 +53,9 @@ export default function ProfileScreen() {
             <p className="mt-1 text-[11px] text-white/50">{pointsToNext} pts to {next}</p>
           </div>
         ) : (
-          <p className="mt-2 text-[11px] text-gold-300">Max rank reached 🏆</p>
+          <p className="mt-2 flex items-center gap-1 text-[11px] text-gold-300">
+            <Trophy size={13} /> Max rank reached
+          </p>
         )}
       </div>
 
@@ -86,12 +90,15 @@ export default function ProfileScreen() {
               <span className="font-semibold text-ink">Season {entry.season}</span>
               <span className="text-ink-soft">Rank #{entry.finalRankPosition}</span>
               <span className="font-bold text-pitch-700">{entry.finalSeasonPoints} pts</span>
-              <span className="flex gap-0.5">
-                {entry.badgesEarned.map((b) => (
-                  <span key={b} title={BADGE_CATALOG[b].label}>
-                    {BADGE_CATALOG[b].icon}
-                  </span>
-                ))}
+              <span className="flex gap-1">
+                {entry.badgesEarned.map((b) => {
+                  const Icon = BADGE_ICONS[BADGE_CATALOG[b].icon];
+                  return (
+                    <span key={b} title={BADGE_CATALOG[b].label}>
+                      <Icon size={14} className="text-gold-600" />
+                    </span>
+                  );
+                })}
               </span>
             </div>
           ))}
@@ -105,8 +112,20 @@ export default function ProfileScreen() {
         </p>
         <div className="mt-2.5 flex items-center gap-2 rounded-lg bg-paper px-3 py-2">
           <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-ink-soft">{referralLink}</span>
-          <button type="button" onClick={copyReferral} className="shrink-0 text-[11px] font-bold text-pitch-700">
-            {copied ? "Copied ✓" : "Copy"}
+          <button
+            type="button"
+            onClick={copyReferral}
+            className="flex shrink-0 items-center gap-1 text-[11px] font-bold text-pitch-700"
+          >
+            {copied ? (
+              <>
+                <Check size={13} /> Copied
+              </>
+            ) : (
+              <>
+                <Copy size={13} /> Copy
+              </>
+            )}
           </button>
         </div>
         <button
