@@ -5,7 +5,6 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -17,14 +16,26 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 /// bounded by what was actually funded for that matchday. This contract intentionally does NOT
 /// verify picks or scoring on-chain — see the audit notes in README.md for the trust assumptions
 /// this implies.
-contract MatchPickVault is
-    Initializable,
-    UUPSUpgradeable,
-    AccessControlUpgradeable,
-    PausableUpgradeable,
-    ReentrancyGuardUpgradeable
-{
+/// @dev Reentrancy guard is hand-rolled rather than OpenZeppelin's, because contracts-upgradeable
+/// v5.1+ dropped the persistent-storage ReentrancyGuardUpgradeable in favor of a transient-storage
+/// (EIP-1153) variant, and Celo's opcode support for TSTORE/TLOAD wasn't something to bet
+/// fund-custody code on without explicit confirmation. This is the same classic locked-slot
+/// pattern OZ shipped for years, just inlined.
+contract MatchPickVault is Initializable, UUPSUpgradeable, AccessControlUpgradeable, PausableUpgradeable {
     using SafeERC20 for IERC20;
+
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    uint256 private _reentrancyStatus;
+
+    error ReentrantCall();
+
+    modifier nonReentrant() {
+        if (_reentrancyStatus == _ENTERED) revert ReentrantCall();
+        _reentrancyStatus = _ENTERED;
+        _;
+        _reentrancyStatus = _NOT_ENTERED;
+    }
 
     /// @notice Role allowed to submit matchday settlements and referral bonus payouts.
     /// @dev This is the MatchPick backend's hot wallet. It can only move funds that were already
@@ -89,9 +100,9 @@ contract MatchPickVault is
 
         __AccessControl_init();
         __Pausable_init();
-        __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
 
+        _reentrancyStatus = _NOT_ENTERED;
         cUSD = IERC20(cUSDToken);
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(SETTLER_ROLE, settler);
